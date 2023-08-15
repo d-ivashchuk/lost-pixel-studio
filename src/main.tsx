@@ -31,6 +31,9 @@ const Providers = () => {
       {/* <Spotlight /> */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.main
+          style={{
+            height: "inherit",
+          }}
           key={useLocation().pathname}
           //change speed of animation
           transition={{ duration: 0.2 }}

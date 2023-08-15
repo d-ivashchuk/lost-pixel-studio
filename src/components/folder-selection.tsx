@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
 import { open } from "@tauri-apps/api/dialog";
-import { Store } from "tauri-plugin-store-api";
+
+import { store } from "../lib/store";
 
 function FolderSelection() {
   const [baselineFolder, setBaselineFolder] = useState<string | null>(null);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
-  const store = new Store(".settings.dat");
 
   useEffect(() => {
     // Load previously selected folders from the store
@@ -19,7 +19,7 @@ function FolderSelection() {
   }, [store]);
 
   const selectBaselineFolder = async () => {
-    const selected = await open({ directory: true });
+    const selected = await open({ directory: true, recursive: true });
     if (typeof selected === "string") {
       setBaselineFolder(selected);
       store.set("baselineFolder", selected);
@@ -27,7 +27,7 @@ function FolderSelection() {
   };
 
   const selectCurrentFolder = async () => {
-    const selected = await open({ directory: true });
+    const selected = await open({ directory: true, recursive: true });
     if (typeof selected === "string") {
       setCurrentFolder(selected);
       store.set("currentFolder", selected);
