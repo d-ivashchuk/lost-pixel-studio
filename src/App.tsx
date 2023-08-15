@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Center, Container, Paper, Title, Text } from "@mantine/core";
+import { Container, Paper, Title, Text } from "@mantine/core";
 import "./App.css";
 import FolderSelection from "./components/folder-selection";
-import ImageDisplay from "./components/image-display";
+
 import { store } from "./lib/store";
-import { readDir, BaseDirectory, readBinaryFile } from "@tauri-apps/api/fs";
+import { readDir, BaseDirectory } from "@tauri-apps/api/fs";
 import GitStatusButton from "./components/git-status-button";
 import { categorizeImages } from "./utils/categorise-images";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -20,40 +20,6 @@ export type Image = {
 export type TypedImage = Image & {
   type: ImageType;
 };
-
-// const loadImages = async (folder: string): Promise<Image[]> => {
-//   console.time(`Time taken to load images from ${folder}`);
-//   console.log(`Loading images from ${folder}}`);
-
-//   console.time(`Time taken to execute readDir from ${folder}`);
-//   const entries = await readDir(folder, {
-//     dir: BaseDirectory.AppData,
-//     recursive: true,
-//   });
-//   console.timeEnd(`Time taken to execute readDir from ${folder}`);
-
-//   console.log(`Loaded directory entries from ${folder}}`);
-
-//   console.time(`Time taken to execute imagePromises from ${folder}`);
-//   const imagePromises = entries.map((entry) => readBinaryFile(entry.path));
-//   console.timeEnd(`Time taken to execute imagePromises from ${folder}`);
-
-//   console.time(`Time taken to execute imageFiles from ${folder}`);
-//   const imageFiles = await Promise.all(imagePromises);
-//   console.log({ imageFiles });
-//   console.timeEnd(`Time taken to execute imageFiles from ${folder}`);
-
-//   console.time(`Time taken to execute images from ${folder}`);
-//   const images: Image[] = imageFiles.map((file, index) => ({
-//     // url: URL.createObjectURL(new Blob([file])),
-//     name: entries[index].name as string,
-//     path: entries[index].path,
-//   }));
-//   console.timeEnd(`Time taken to execute images from ${folder}`);
-
-//   console.timeEnd(`Time taken to load images from ${folder}`);
-//   return images;
-// };
 
 const loadImages = async (folder: string): Promise<Image[]> => {
   console.time(`Time taken to load images from ${folder}`);
@@ -88,22 +54,6 @@ function App() {
   const [currentImages, setCurrentImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    if (lostPixelFolder) {
-      console.time(`Time taken to check git from ${lostPixelFolder}`);
-      invoke<string>("check_git_status", { lostPixelFolder })
-        .then((status) => {
-          console.log("Setting git status");
-          setGitStatus(status);
-        })
-        .catch((error) => {
-          console.error("Failed to get Git status:", error);
-        });
-      console.log({ gitStatus });
-      console.timeEnd(`Time taken to check git from ${lostPixelFolder}`);
-    }
-  }, [lostPixelFolder]);
-
-  useEffect(() => {
     const setFolders = async () => {
       const baseline = await store.get("baselineFolder");
       const current = await store.get("currentFolder");
@@ -118,6 +68,23 @@ function App() {
     setFolders();
     console.timeEnd("Time taken to set folders");
   }, []);
+
+  useEffect(() => {
+    if (lostPixelFolder) {
+      console.time(`Time taken to check git from ${lostPixelFolder}`);
+      invoke<string>("check_git_status", { folderPath: lostPixelFolder })
+        .then((status) => {
+          console.log("Setting git status");
+          setGitStatus(status);
+          console.log({ gitStatus });
+        })
+        .catch((error) => {
+          console.error("Failed to get Git status:", error);
+        });
+      console.log({ gitStatus });
+      console.timeEnd(`Time taken to check git from ${lostPixelFolder}`);
+    }
+  }, [lostPixelFolder, baselineImages, currentImages]);
 
   useEffect(() => {
     const setImages = async () => {
@@ -217,16 +184,44 @@ function App() {
           )}
         </Paper>
       </Container>
-
-      {/* <Center>
-        <Title order={1}>Lost Pixel Studio</Title>
-      </Center>
-      <FolderSelection />
-
-      <ImageDisplay path={baselineFolder} />
-      <ImageDisplay path={currentFolder} /> */}
     </>
   );
 }
 
 export default App;
+
+//! This is the old code that I used to load images from a folder. I'm keeping it here for reference.
+
+// const loadImages = async (folder: string): Promise<Image[]> => {
+//   console.time(`Time taken to load images from ${folder}`);
+//   console.log(`Loading images from ${folder}}`);
+
+//   console.time(`Time taken to execute readDir from ${folder}`);
+//   const entries = await readDir(folder, {
+//     dir: BaseDirectory.AppData,
+//     recursive: true,
+//   });
+//   console.timeEnd(`Time taken to execute readDir from ${folder}`);
+
+//   console.log(`Loaded directory entries from ${folder}}`);
+
+//   console.time(`Time taken to execute imagePromises from ${folder}`);
+//   const imagePromises = entries.map((entry) => readBinaryFile(entry.path));
+//   console.timeEnd(`Time taken to execute imagePromises from ${folder}`);
+
+//   console.time(`Time taken to execute imageFiles from ${folder}`);
+//   const imageFiles = await Promise.all(imagePromises);
+//   console.log({ imageFiles });
+//   console.timeEnd(`Time taken to execute imageFiles from ${folder}`);
+
+//   console.time(`Time taken to execute images from ${folder}`);
+//   const images: Image[] = imageFiles.map((file, index) => ({
+//     // url: URL.createObjectURL(new Blob([file])),
+//     name: entries[index].name as string,
+//     path: entries[index].path,
+//   }));
+//   console.timeEnd(`Time taken to execute images from ${folder}`);
+
+//   console.timeEnd(`Time taken to load images from ${folder}`);
+//   return images;
+// };
