@@ -89,32 +89,27 @@ function App() {
   useEffect(() => {
     const setImages = async () => {
       const baseline = await store.get("baselineFolder");
-
       setBaselineFolder(baseline as string | null);
-
       if (baselineFolder) {
-        console.log("fetching basline images");
+        console.log("fetching baseline images");
         const images = await loadImages(baselineFolder);
         setBaselineImages(images);
       }
     };
 
     setImages();
-  }, [baselineFolder, currentFolder, store]);
-  useEffect(() => {
-    invoke<string>("check_git_status", { lostPixelFolder })
-      .then((status) => {
-        setGitStatus(status);
-      })
-      .catch((error) => {
-        console.error("Failed to get Git status:", error);
-      });
 
+    const intervalId = setInterval(() => {
+      setImages();
+    }, 3000); // Poll every 3 second
+
+    return () => clearInterval(intervalId); // Clear the interval when the component is unmounted
+  }, [baselineFolder, store]);
+
+  useEffect(() => {
     const setImages = async () => {
       const current = await store.get("currentFolder");
-
       setCurrentFolder(current as string | null);
-
       if (currentFolder) {
         console.log("fetching current images");
         const images = await loadImages(currentFolder);
@@ -123,7 +118,20 @@ function App() {
     };
 
     setImages();
-  }, [baselineFolder, currentFolder, store]);
+
+    const intervalId = setInterval(() => {
+      invoke<string>("check_git_status", { folderPath: lostPixelFolder })
+        .then((status) => {
+          setGitStatus(status);
+        })
+        .catch((error) => {
+          console.error("Failed to get Git status:", error);
+        });
+      setImages();
+    }, 3000); // Poll every 3 second
+
+    return () => clearInterval(intervalId); // Clear the interval when the component is unmounted
+  }, [currentFolder, store]);
 
   const images = useMemo(() => {
     const categorisedImages = categorizeImages(
