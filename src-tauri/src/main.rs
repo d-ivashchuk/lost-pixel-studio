@@ -1,7 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-use std::fs;
+use std::process::Command;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -10,23 +9,20 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn list_images(folder_path: String) -> Result<Vec<String>, String> {
-  let entries = fs::read_dir(folder_path).map_err(|e| e.to_string())?;
-  let image_paths: Vec<String> = entries
-    .filter_map(Result::ok)
-    .filter(|entry| {
-      let path = entry.path();
-      path.is_file() && path.extension().map_or(false, |ext| ext == "png" || ext == "jpg" || ext == "jpeg")
-    })
-    .map(|entry| entry.path().to_str().unwrap().to_string())
-    .collect();
-  Ok(image_paths)
+fn check_git_status(folder_path: String) -> Result<String, String> {
+  Command::new("git")
+    .args(["status", "--porcelain"])
+    .current_dir(folder_path) // Set the working directory to the provided folder path
+    .output()
+    .map(|output| String::from_utf8_lossy(&output.stdout).to_string())
+    .map_err(|err| err.to_string())
 }
 
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![greet, list_images])
+        .plugin(tauri_plugin_persisted_scope::init())
+        .invoke_handler(tauri::generate_handler![greet, check_git_status])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
