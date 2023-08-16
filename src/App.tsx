@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Container, Paper, Title, Text } from "@mantine/core";
+import { Container, Paper, Title, Text, Flex, Group } from "@mantine/core";
 import "./App.css";
 import FolderSelection from "./components/folder-selection";
 
@@ -8,6 +8,7 @@ import { readDir, BaseDirectory } from "@tauri-apps/api/fs";
 import GitStatusButton from "./components/git-status-button";
 import { categorizeImages } from "./utils/categorise-images";
 import { invoke } from "@tauri-apps/api/tauri";
+import ApproveButton from "./components/approve-button";
 
 export type ImageType = "noDiff" | "diff" | "addition" | "deletion";
 
@@ -150,29 +151,38 @@ function App() {
           style={{ width: "25%", marginRight: 20, padding: 20 }}
           withBorder
         >
-          <Title>Baseline</Title>
+          <Title order={4}>Baseline Folder</Title>
           {baselineImages.map((image) => (
             <div>{image.name}</div>
           ))}
-          <Title>Current</Title>
+          <Title order={4}>Current Folder</Title>
           {currentImages.map((image) => (
             <div>{image.name}</div>
           ))}
-          <Title>Baselines</Title>
+          <Title order={4}>Baselines</Title>
           {images.map((image) => (
-            <Text
-              color={
-                image.type === "addition"
-                  ? "green"
-                  : image.type === "deletion"
-                  ? "red"
-                  : image.type === "diff"
-                  ? "yellow"
-                  : "gray"
-              }
-            >
-              {image.name}
-            </Text>
+            <Group spacing="sm">
+              <Text
+                color={
+                  image.type === "addition"
+                    ? "green"
+                    : image.type === "deletion"
+                    ? "red"
+                    : image.type === "diff"
+                    ? "yellow"
+                    : "gray"
+                }
+              >
+                {image.name}
+              </Text>
+              {image.type !== "noDiff" && (
+                <ApproveButton
+                  imageType={image.type}
+                  baselinePath={image.path.replace("current", "baseline")}
+                  currentPath={image.path}
+                />
+              )}
+            </Group>
           ))}
         </Paper>
         {/* Main Pane */}

@@ -19,6 +19,7 @@
     "@mantine/notifications": "^6.0.19",
     "@tauri-apps/api": "^1.4.0",
     "framer-motion": "^10.15.2",
+    "lost-pixel": "^3.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.15.0",
