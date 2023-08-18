@@ -5,6 +5,8 @@ export const config: CustomProjectConfig = {
     pages: [
       { path: "/layouts/books/fiction", name: "fiction-books" },
       { path: "/layouts/books/biography", name: "biography-pages" },
+      { path: "route-groups/clothing", name: "clothing" },
+      { path: "layouts/electronics", name: "nested" },
     ],
     baseUrl: "http://localhost:3001",
   },

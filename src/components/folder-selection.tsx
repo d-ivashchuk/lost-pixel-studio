@@ -8,6 +8,7 @@ function FolderSelection() {
   const [baselineFolder, setBaselineFolder] = useState<string | null>(null);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [lostPixelFolder, setLostPixelFolder] = useState<string | null>(null);
+  const [projectFolder, setProjectFolder] = useState<string | null>(null);
 
   useEffect(() => {
     // Load previously selected folders from the store
@@ -21,6 +22,9 @@ function FolderSelection() {
     store
       .get("lostPixelFolder")
       .then((value) => setLostPixelFolder(value as string | null));
+    store
+      .get("projectFolder")
+      .then((value) => setProjectFolder(value as string | null));
   }, [store]);
 
   const selectBaselineFolder = async () => {
@@ -50,6 +54,15 @@ function FolderSelection() {
     }
   };
 
+  const selectProjectFolder = async () => {
+    const selected = await open({ directory: true, recursive: true });
+    if (typeof selected === "string") {
+      setProjectFolder(selected);
+      store.set("projectFolder", selected);
+      await store.save();
+    }
+  };
+
   return (
     <>
       <Button onClick={selectBaselineFolder}>Select Baseline Folder</Button>
@@ -58,6 +71,8 @@ function FolderSelection() {
       {currentFolder && <p>Selected Current Folder: {currentFolder}</p>}
       <Button onClick={selectLostPixelFolder}>Lost Pixel Folder</Button>
       {currentFolder && <p>Selected Lost Pixel Folder: {lostPixelFolder}</p>}
+      <Button onClick={selectProjectFolder}>Project Folder</Button>
+      {projectFolder && <p>Selected Project Folder: {projectFolder}</p>}
     </>
   );
 }

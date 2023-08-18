@@ -9,6 +9,7 @@ import GitStatusButton from "./components/git-status-button";
 import { categorizeImages } from "./utils/categorise-images";
 import { invoke } from "@tauri-apps/api/tauri";
 import ApproveButton from "./components/approve-button";
+import RunLostPixelButton from "./components/lost-pixel-run";
 
 export type ImageType = "noDiff" | "diff" | "addition" | "deletion";
 
@@ -200,6 +201,7 @@ function App() {
               currentImages={currentImages}
             />
           )}
+          <RunLostPixelButton />
         </Paper>
       </Container>
     </>
