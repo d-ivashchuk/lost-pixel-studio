@@ -1,5 +1,6 @@
 import { Button } from "@mantine/core";
 import { removeFile, copyFile } from "@tauri-apps/api/fs";
+import { ImageType } from "../App";
 
 function ApproveButton({
   imageType,
@@ -8,13 +9,14 @@ function ApproveButton({
   differencePath,
   onApprovalComplete,
 }: {
-  imageType: "deletion" | "addition" | "diff";
+  imageType: ImageType;
   baselinePath: string;
   currentPath: string;
   differencePath?: string; // Optional for diff images
   onApprovalComplete: () => void;
 }) {
   const handleAction = async () => {
+    console.log({ imageType, baselinePath, currentPath, differencePath });
     switch (imageType) {
       case "deletion":
         await removeFile(baselinePath);

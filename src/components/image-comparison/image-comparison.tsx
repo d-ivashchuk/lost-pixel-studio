@@ -5,6 +5,8 @@ import { Group, SegmentedControl } from "@mantine/core";
 import ImageCompareSlider from "./image-compare-slider";
 import ImageCompareDiff from "./image-compare-difference";
 import ImageCompareSideBySide from "./image-compare-side-by-side";
+import ApproveButton from "../approve-button";
+import { TypedImage } from "../../App";
 
 type DirectoryPaths = {
   baseline: string;
@@ -14,9 +16,15 @@ type DirectoryPaths = {
 
 type ImageComparisonProps = {
   directories: DirectoryPaths;
+  selectedImage: TypedImage;
+  setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const ImageComparison: React.FC<ImageComparisonProps> = ({ directories }) => {
+const ImageComparison: React.FC<ImageComparisonProps> = ({
+  directories,
+  selectedImage,
+  setRefreshTrigger,
+}) => {
   const [searchParams] = useSearchParams();
   const [comparisonView, setComparisonView] = useState<
     "slider" | "sideBySide" | "difference"
@@ -67,6 +75,26 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({ directories }) => {
             { value: "difference", label: "Difference" },
           ]}
         />
+
+        <ApproveButton
+          imageType={selectedImage.type}
+          baselinePath={
+            selectedImage.path.includes("baseline")
+              ? selectedImage.path
+              : selectedImage.path.replace("current", "baseline")
+          }
+          currentPath={
+            selectedImage.path.includes("current")
+              ? selectedImage.path
+              : selectedImage.path.replace("baseline", "current")
+          }
+          differencePath={selectedImage.path
+            .replace("current", "difference")
+            .replace("baseline", "difference")}
+          onApprovalComplete={() =>
+            setRefreshTrigger((prev: number) => prev + 1)
+          }
+        />
       </Group>
       {baselineImageUrl && currentImageUrl && (
         <div>
@@ -96,55 +124,28 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({ directories }) => {
           )}
         </div>
       )}
+      {selectedImage.type === "addition" && currentImageUrl && (
+        <img
+          style={{
+            maxWidth: "100%",
+            maxHeight: "100%",
+          }}
+          src={currentImageUrl}
+          alt="Addition"
+        />
+      )}
+      {selectedImage.type === "deletion" && baselineImageUrl && (
+        <img
+          style={{
+            maxWidth: "100%",
+            maxHeight: "100%",
+          }}
+          src={baselineImageUrl}
+          alt="Addition"
+        />
+      )}
     </>
   );
 };
 
 export default ImageComparison;
-
-{
-  /* <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
-  {baselineImageUrl && (
-    <div>
-      <Text>Baseline</Text>
-      <img
-        src={baselineImageUrl}
-        alt="Baseline Image"
-        style={{
-          width: "300px",
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-        }}
-      />
-    </div>
-  )}
-  {currentImageUrl && (
-    <div>
-      <Text>Current</Text>
-      <img
-        src={currentImageUrl}
-        alt="Current Image"
-        style={{
-          width: "300px",
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-        }}
-      />
-    </div>
-  )}
-  {differenceImageUrl && (
-    <div>
-      <Text>Difference</Text>
-      <img
-        src={differenceImageUrl}
-        alt="Difference Image"
-        style={{
-          width: "300px",
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-        }}
-      />
-    </div>
-  )}
-</div>; */
-}

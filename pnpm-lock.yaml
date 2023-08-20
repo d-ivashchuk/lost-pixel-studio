@@ -8,6 +8,7 @@ specifiers:
   '@mantine/hooks': ^6.0.19
   '@mantine/next': ^6.0.19
   '@mantine/notifications': ^6.0.19
+  '@mantine/spotlight': ^6.0.19
   '@tauri-apps/api': ^1.4.0
   '@tauri-apps/cli': ^1.4.0
   '@types/react': ^18.2.15
@@ -31,6 +32,7 @@ dependencies:
   '@mantine/hooks': 6.0.19_react@18.2.0
   '@mantine/next': 6.0.19_xqxuaamezyvra6ke55n3ecerpm
   '@mantine/notifications': 6.0.19_ttukj57io3fchg42nfrok6jn3y
+  '@mantine/spotlight': 6.0.19_ttukj57io3fchg42nfrok6jn3y
   '@tauri-apps/api': 1.4.0
   framer-motion: 10.15.2_biqbaboplfbrettd7655fr4n2y
   lost-pixel: 3.4.3_jch25vbq34sbabk3unb5q5rkqi
@@ -921,6 +923,21 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-transition-group: 4.4.2_biqbaboplfbrettd7655fr4n2y
+    dev: false
+
+  /@mantine/spotlight/6.0.19_ttukj57io3fchg42nfrok6jn3y:
+    resolution: {integrity: sha512-KkZBpHLGUr2BiYpYP6huQ+U7W1Vs3rES+xoD25D4tYwXJ1z2uFHJcMm2huOhgluEAFZoEJcXSmPWGPQQS8DUSg==}
+    peerDependencies:
+      '@mantine/core': 6.0.19
+      '@mantine/hooks': 6.0.19
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      '@mantine/core': 6.0.19_57tiqatj7nioqs24iphuozwpwy
+      '@mantine/hooks': 6.0.19_react@18.2.0
+      '@mantine/utils': 6.0.19_react@18.2.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: false
 
   /@mantine/ssr/6.0.19_cvn44t664qknyqcemkzlarhdby:

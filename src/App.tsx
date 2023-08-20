@@ -1,20 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
-import { Container, Paper, Title, Text, Flex, Group, Box } from "@mantine/core";
+import {
+  Container,
+  Paper,
+  Title,
+  Text,
+  Group,
+  LoadingOverlay,
+} from "@mantine/core";
 import "./App.css";
 
 import { store } from "./lib/store";
 import { readDir, BaseDirectory } from "@tauri-apps/api/fs";
 import { categorizeImages } from "./utils/categorise-images";
 import { invoke } from "@tauri-apps/api/tauri";
-import ApproveButton from "./components/approve-button";
-// import FolderSelection from "./components/folder-selection";
-// import GitStatusButton from "./components/git-status-button";
-// import RunLostPixelButton from "./components/lost-pixel-run";
+
 import { constructSubDirectories } from "./utils/get-lost-pixel-subdirectories";
 import { useSearchParams } from "react-router-dom";
 import ImageComparison from "./components/image-comparison/image-comparison";
-import RunLostPixelButton from "./components/lost-pixel-run";
+import type { SpotlightAction } from "@mantine/spotlight";
+import { SpotlightProvider } from "@mantine/spotlight";
+import { Command } from "@tauri-apps/api/shell";
 
+const actions: SpotlightAction[] = [
+  {
+    title: "Run Lost Pixel",
+    description: "Execute visual regression testing",
+    onTrigger: () => {},
+  },
+  {
+    title: "Settings",
+    description: "Get full information about current system status",
+    onTrigger: () => console.log("Dashboard"),
+  },
+  {
+    title: "Documentation",
+    description: "Visit documentation to lean more about all features",
+    onTrigger: () => console.log("Documentation"),
+  },
+];
 export type ImageType = "noDiff" | "diff" | "addition" | "deletion";
 
 export type Image = {
@@ -48,11 +71,15 @@ function App() {
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   const [_, setSearchParams] = useSearchParams();
 
+  const [isLpRunLoading, setIsLpRunLoading] = useState<boolean>(false);
+  const [isLpRunSuccess, setIsLpRunSuccess] = useState<boolean>(false);
+  const [isLpRunError, setIsLpRunError] = useState<boolean>(false);
+
   const [baselineImages, setBaselineImages] = useState<Image[]>([]);
   const [currentImages, setCurrentImages] = useState<Image[]>([]);
   const [differenceImages, setDifferenceImages] = useState<Image[]>([]);
   const [searchParams] = useSearchParams();
-  const imageName = searchParams.get("image");
+  const selectedImageName = searchParams.get("image");
 
   const directories = useMemo(() => {
     return constructSubDirectories(lostPixelFolder as string);
@@ -117,56 +144,107 @@ function App() {
     refreshTrigger,
   ]);
 
+  const selectedImage = images.find(
+    (image) => image.name === selectedImageName
+  );
+
+  console.log({ selectedImage });
+
+  const actions: SpotlightAction[] = [
+    {
+      title: "Run Lost Pixel",
+      description: "Execute visual regression testing",
+      onTrigger: async () => {
+        const projectPath = await store.get("projectFolder");
+
+        if (typeof projectPath === "string") {
+          setIsLpRunLoading(true);
+          const command = new Command("run-lost-pixel", ["lost-pixel"], {
+            cwd: projectPath,
+          });
+          try {
+            await command.execute();
+            setIsLpRunSuccess(true);
+          } catch (error) {
+            console.error(`Command error: "${error}"`);
+            setIsLpRunError(true);
+          } finally {
+            setRefreshTrigger((prev) => prev + 1);
+            setIsLpRunLoading(false);
+          }
+        } else {
+          setIsLpRunError(true);
+          setIsLpRunLoading(false);
+        }
+      },
+    },
+    {
+      title: "Settings",
+      description: "Get full information about current system status",
+      onTrigger: () => console.log("Dashboard"),
+    },
+    {
+      title: "Documentation",
+      description: "Visit documentation to lean more about all features",
+      onTrigger: () => console.log("Documentation"),
+    },
+  ];
+
   return (
     <>
-      <Container size="xl" style={{ display: "flex" }}>
-        <Paper
-          style={{ width: "15%", marginRight: 20, padding: 20 }}
-          withBorder
-        >
-          <Title order={4}>Baselines</Title>
-          {images.map((image) => (
-            <Group spacing="xs">
-              <Text
-                style={{ cursor: "pointer" }}
-                truncate
-                onClick={() => {
-                  setSearchParams({
-                    image: image.name,
-                  });
-                }}
-                color={
-                  image.type === "addition"
-                    ? "green"
-                    : image.type === "deletion"
-                    ? "red"
-                    : image.type === "diff"
-                    ? "yellow"
-                    : "gray"
-                }
-                opacity={imageName === image.name ? 1 : 0.5}
-              >
-                {image.name}
-              </Text>
-              {image.type !== "noDiff" && (
-                <ApproveButton
-                  imageType={image.type}
-                  baselinePath={image.path}
-                  currentPath={image.path.replace("baseline", "current")}
-                  differencePath={image.path.replace("baseline", "difference")}
-                  onApprovalComplete={() =>
-                    setRefreshTrigger((prev) => prev + 1)
+      <SpotlightProvider
+        actions={actions}
+        searchPlaceholder="Search..."
+        shortcut="mod + k"
+        nothingFoundMessage="Nothing found..."
+      >
+        <Container size="xl" style={{ display: "flex" }}>
+          <LoadingOverlay visible={isLpRunLoading} />
+          <Paper
+            style={{ width: "15%", marginRight: 20, padding: 20 }}
+            withBorder
+          >
+            <Title order={4}>Baselines</Title>
+            {images.map((image) => (
+              <Group spacing="xs">
+                <Text
+                  style={{ cursor: "pointer" }}
+                  truncate
+                  onClick={() => {
+                    setSearchParams({
+                      image: image.name,
+                    });
+                  }}
+                  color={
+                    image.type === "addition"
+                      ? "green"
+                      : image.type === "deletion"
+                      ? "red"
+                      : image.type === "diff"
+                      ? "yellow"
+                      : "gray"
                   }
-                />
-              )}
-            </Group>
-          ))}
-        </Paper>
+                  opacity={selectedImageName === image.name ? 1 : 0.5}
+                >
+                  {image.name}
+                </Text>
+              </Group>
+            ))}
+          </Paper>
 
-        <Paper style={{ flex: 1, padding: 20 }} withBorder>
-          <ImageComparison directories={directories} />
-        </Paper>
-      </Container>
+          <Paper style={{ flex: 1, padding: 20 }} withBorder>
+            {selectedImage ? (
+              <ImageComparison
+                selectedImage={selectedImage}
+                directories={directories}
+                setRefreshTrigger={setRefreshTrigger}
+              />
+            ) : (
+              <Text>Select an image to compare</Text>
+            )}
+          </Paper>
+        </Container>
+      </SpotlightProvider>
     </>
   );
 }

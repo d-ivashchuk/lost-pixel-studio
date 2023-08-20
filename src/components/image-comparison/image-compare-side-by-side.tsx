@@ -1,4 +1,4 @@
-import { Box, Flex, Group } from "@mantine/core";
+import { Box, Flex } from "@mantine/core";
 
 type Props = {
   beforeImage: string;

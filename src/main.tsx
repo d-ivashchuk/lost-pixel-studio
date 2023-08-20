@@ -6,7 +6,6 @@ import {
   useLocation,
   useOutlet,
 } from "react-router-dom";
-
 import { ColorScheme, ColorSchemeProvider } from "@mantine/core";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -14,7 +13,6 @@ import { AnimatePresence, motion } from "framer-motion";
 // basic window styles live here
 import "./styles.css";
 import App from "./App";
-
 //hooks are generated from the procedures defined in the tauri bindings
 
 const Providers = () => {
@@ -28,7 +26,6 @@ const Providers = () => {
       colorScheme={colorScheme}
       toggleColorScheme={toggleColorScheme}
     >
-      {/* <Spotlight /> */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.main
           style={{

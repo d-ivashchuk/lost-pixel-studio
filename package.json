@@ -17,6 +17,7 @@
     "@mantine/hooks": "^6.0.19",
     "@mantine/next": "^6.0.19",
     "@mantine/notifications": "^6.0.19",
+    "@mantine/spotlight": "^6.0.19",
     "@tauri-apps/api": "^1.4.0",
     "framer-motion": "^10.15.2",
     "lost-pixel": "^3.4.3",
