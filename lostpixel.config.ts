@@ -8,7 +8,8 @@ export const config: CustomProjectConfig = {
       { path: "route-groups/clothing", name: "clothing" },
       { path: "layouts/electronics", name: "nested" },
     ],
-    baseUrl: "http://localhost:3001",
+    baseUrl: "http://localhost:3000",
   },
   generateOnly: true,
+  compareEngine: "odiff",
 };

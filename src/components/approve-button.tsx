@@ -5,24 +5,33 @@ function ApproveButton({
   imageType,
   baselinePath,
   currentPath,
+  differencePath,
+  onApprovalComplete,
 }: {
   imageType: "deletion" | "addition" | "diff";
   baselinePath: string;
   currentPath: string;
+  differencePath?: string; // Optional for diff images
+  onApprovalComplete: () => void;
 }) {
-  console.log({ baselinePath, currentPath });
   const handleAction = async () => {
     switch (imageType) {
       case "deletion":
         await removeFile(baselinePath);
         break;
       case "addition":
+        await copyFile(currentPath, baselinePath);
+        break;
       case "diff":
         await copyFile(currentPath, baselinePath);
+        if (differencePath) {
+          await removeFile(differencePath);
+        }
         break;
       default:
         console.error("Unknown image type");
     }
+    onApprovalComplete();
   };
 
   return (

@@ -2,7 +2,11 @@ import { Command } from "@tauri-apps/api/shell";
 import { useState } from "react";
 import { store } from "../lib/store";
 
-function RunLostPixelButton() {
+function RunLostPixelButton({
+  onApprovalComplete,
+}: {
+  onApprovalComplete: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -14,7 +18,6 @@ function RunLostPixelButton() {
 
     const projectPath = await store.get("projectFolder");
 
-    console.log(projectPath);
     if (typeof projectPath === "string") {
       const command = new Command("run-lost-pixel", ["lost-pixel"], {
         cwd: projectPath,
@@ -26,6 +29,7 @@ function RunLostPixelButton() {
         console.error(`Command error: "${error}"`);
         setIsError(true);
       } finally {
+        onApprovalComplete();
         setIsLoading(false);
       }
     } else {

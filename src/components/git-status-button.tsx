@@ -19,8 +19,6 @@ const GitStatusButton: React.FC<GitStatusButtonProps> = ({
   gitStatus,
   setGitStatus,
 }) => {
-  console.log({ folderPath });
-
   const handleButtonClick = () => {
     invoke<string>("check_git_status", { folderPath })
       .then((status) => {

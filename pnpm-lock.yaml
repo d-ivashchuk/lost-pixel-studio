@@ -16,6 +16,7 @@ specifiers:
   framer-motion: ^10.15.2
   lost-pixel: ^3.4.3
   react: ^18.2.0
+  react-compare-slider: ^2.2.0
   react-dom: ^18.2.0
   react-router-dom: ^6.15.0
   tauri-plugin-store-api: github:tauri-apps/tauri-plugin-store#v1
@@ -34,6 +35,7 @@ dependencies:
   framer-motion: 10.15.2_biqbaboplfbrettd7655fr4n2y
   lost-pixel: 3.4.3_jch25vbq34sbabk3unb5q5rkqi
   react: 18.2.0
+  react-compare-slider: 2.2.0_biqbaboplfbrettd7655fr4n2y
   react-dom: 18.2.0_react@18.2.0
   react-router-dom: 6.15.0_biqbaboplfbrettd7655fr4n2y
   tauri-plugin-store-api: github.com/tauri-apps/tauri-plugin-store/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa
@@ -2232,6 +2234,16 @@ packages:
   /range-parser/1.2.0:
     resolution: {integrity: sha512-kA5WQoNVo4t9lNx2kQNFCxKeBl5IbbSNBl1M/tLkw9WCn+hxNBAW5Qh8gdhs63CJnhjJ2zQWFoqPJP2sK1AV5A==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /react-compare-slider/2.2.0_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-I77xqulpoibZ9eqjn5wjpZL5IRpUZYcUlde70YaJ+MORGbUThrjTlHKl/UeGyCIPUWtPID5f5/zK9Q+1ovQLeA==}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: false
 
   /react-dom/18.2.0_react@18.2.0:
