@@ -15,7 +15,7 @@ import { categorizeImages } from "./utils/categorise-images";
 import { invoke } from "@tauri-apps/api/tauri";
 
 import { constructSubDirectories } from "./utils/get-lost-pixel-subdirectories";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ImageComparison from "./components/image-comparison/image-comparison";
 import type { SpotlightAction } from "@mantine/spotlight";
 import { SpotlightProvider } from "@mantine/spotlight";
@@ -70,6 +70,7 @@ function App() {
   const [gitStatus, setGitStatus] = useState<string>("");
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   const [_, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [isLpRunLoading, setIsLpRunLoading] = useState<boolean>(false);
   const [isLpRunSuccess, setIsLpRunSuccess] = useState<boolean>(false);
@@ -148,8 +149,6 @@ function App() {
     (image) => image.name === selectedImageName
   );
 
-  console.log({ selectedImage });
-
   const actions: SpotlightAction[] = [
     {
       title: "Run Lost Pixel",
@@ -180,8 +179,8 @@ function App() {
     },
     {
       title: "Settings",
-      description: "Get full information about current system status",
-      onTrigger: () => console.log("Dashboard"),
+      description: "Navigate to settings page",
+      onTrigger: () => navigate("/settings"),
     },
     {
       title: "Documentation",
