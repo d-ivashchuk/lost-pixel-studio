@@ -9,3 +9,7 @@
 body {
   height: 100vh;
 }
+
+.mantine-Container-root {
+  padding-top: 20px;
+}

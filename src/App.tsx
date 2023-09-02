@@ -6,6 +6,7 @@ import {
   Text,
   Group,
   LoadingOverlay,
+  Box,
 } from "@mantine/core";
 import "./App.css";
 
@@ -19,6 +20,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ImageComparison from "./components/image-comparison/image-comparison";
 import type { SpotlightAction } from "@mantine/spotlight";
 import { SpotlightProvider } from "@mantine/spotlight";
+import { parseGitStatus } from "./utils/parse-git-status";
 import { Command } from "@tauri-apps/api/shell";
 
 const actions: SpotlightAction[] = [
@@ -189,6 +191,8 @@ function App() {
     },
   ];
 
+  const parsedGitFiles = parseGitStatus(gitStatus);
+
   return (
     <>
       <SpotlightProvider
@@ -220,7 +224,7 @@ function App() {
                       : image.type === "deletion"
                       ? "red"
                       : image.type === "diff"
-                      ? "yellow"
+                      ? "blue"
                       : "gray"
                   }
                   opacity={selectedImageName === image.name ? 1 : 0.5}
