@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { readBinaryFile } from "@tauri-apps/api/fs";
-import { Group, SegmentedControl } from "@mantine/core";
+import { Badge, Group, SegmentedControl } from "@mantine/core";
 import ImageCompareSlider from "./image-compare-slider";
 import ImageCompareDiff from "./image-compare-difference";
 import ImageCompareSideBySide from "./image-compare-side-by-side";
 import ApproveButton from "../approve-button";
-import { TypedImage } from "../../App";
+import { Meta, TypedImage } from "../../App";
+import { DifferenceBadge } from "./difference-badge";
 
 type DirectoryPaths = {
   baseline: string;
@@ -18,12 +19,14 @@ type ImageComparisonProps = {
   directories: DirectoryPaths;
   selectedImage: TypedImage;
   setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
+  meta: Meta[] | null;
 };
 
 const ImageComparison: React.FC<ImageComparisonProps> = ({
   directories,
   selectedImage,
   setRefreshTrigger,
+  meta,
 }) => {
   const [searchParams] = useSearchParams();
   const [comparisonView, setComparisonView] = useState<
@@ -34,6 +37,9 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
   const [differenceImageUrl, setDifferenceImageUrl] = useState<string | null>(
     null
   );
+  const [badgeDisplayMode, setBadgeDisplayMode] = useState<
+    "absolute" | "relative"
+  >("absolute");
 
   const isBaseline = searchParams.get("isBaseline");
 
@@ -74,9 +80,21 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     );
   }
 
+  const imageMetadata = meta?.find(
+    (m) => m.name === selectedImage.name.replace(".png", "")
+  );
+
   return (
     <>
       <Group mb="sm">
+        {imageMetadata && (
+          <DifferenceBadge
+            displayMode={badgeDisplayMode}
+            setDisplayMode={setBadgeDisplayMode}
+            pixelDifference={imageMetadata.pixelDifference}
+            pixelDifferencePercentage={imageMetadata.pixelDifferencePercentage}
+          />
+        )}
         <SegmentedControl
           disabled={["addition", "deletion"].includes(selectedImage.type)}
           size="xs"

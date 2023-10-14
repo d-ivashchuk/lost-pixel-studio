@@ -19,5 +19,5 @@ export const config: CustomProjectConfig = {
   //   baseUrl: "http://localhost:3000",
   // },
   generateOnly: true,
-  compareEngine: "odiff",
+  compareEngine: "pixelmatch",
 };

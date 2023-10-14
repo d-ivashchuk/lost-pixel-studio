@@ -21,7 +21,7 @@
           {
             "name": "run-lost-pixel",
             "cmd": "npx",
-            "args": ["lost-pixel, docker"]
+            "args": ["lost-pixel, docker, meta"]
           }
         ]
       },

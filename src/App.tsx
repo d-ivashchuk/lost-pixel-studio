@@ -10,7 +10,7 @@ import {
 import "./App.css";
 
 import { store } from "./lib/store";
-import { readDir, BaseDirectory } from "@tauri-apps/api/fs";
+import { readDir, BaseDirectory, readTextFile } from "@tauri-apps/api/fs";
 import { categorizeImages } from "./utils/categorise-images";
 import { invoke } from "@tauri-apps/api/tauri";
 
@@ -46,6 +46,13 @@ export type Image = {
   // url: string;
 };
 
+export type Meta = {
+  name: string;
+  isWithinThreshold: boolean;
+  pixelDifference: number;
+  pixelDifferencePercentage: number;
+};
+
 export type TypedImage = Image & {
   type: ImageType;
 };
@@ -56,13 +63,35 @@ const loadImages = async (folder: string): Promise<Image[]> => {
     recursive: true,
   });
 
-  const images: Image[] = entries.map((entry) => ({
-    name: entry.name as string,
-    path: entry.path,
-    url: "", // Since we're not reading the image, we can't create a blob URL. You can adjust this as needed.
-  }));
+  const images: Image[] = entries
+    .filter((entry) => entry.name !== "meta.json")
+    .map((entry) => ({
+      name: entry.name as string,
+      path: entry.path,
+      url: "", // Since we're not reading the image, we can't create a blob URL. You can adjust this as needed.
+    }));
 
   return images;
+};
+
+const loadMeta = async (folder: string) => {
+  const entries = await readDir(folder, {
+    dir: BaseDirectory.AppData,
+    recursive: true,
+  });
+
+  // Find the meta.json entry
+  const metaEntry = entries.find((entry) => entry.name === "meta.json");
+
+  if (!metaEntry) {
+    throw new Error("meta.json not found in the specified folder");
+  }
+
+  // Assuming you have a readFile function to read file content
+  const metaContent = await readTextFile(metaEntry.path);
+
+  // Parse the content as JSON and return it
+  return JSON.parse(metaContent);
 };
 
 function App() {
@@ -83,6 +112,9 @@ function App() {
   const [baselineImages, setBaselineImages] = useState<Image[]>([]);
   const [currentImages, setCurrentImages] = useState<Image[]>([]);
   const [differenceImages, setDifferenceImages] = useState<Image[]>([]);
+
+  const [meta, setMeta] = useState<Meta[] | null>(null);
+
   const [searchParams] = useSearchParams();
   const selectedImageName = searchParams.get("image");
 
@@ -118,11 +150,28 @@ function App() {
     }
   };
 
+  const loadAndSetMeta = async (directory: string) => {
+    if (directory) {
+      const meta = await loadMeta(directory);
+
+      // convert meta object to array before setting state, set keys as values, add other fields
+      const metaArray = Object.keys(meta).map((key) => ({
+        name: key,
+        ...meta[key],
+      }));
+
+      setMeta(metaArray);
+    }
+  };
+
   useEffect(() => {
     // Load images initially
     loadAndSetImages(directories.baseline, setBaselineImages);
     loadAndSetImages(directories.difference, setDifferenceImages);
     loadAndSetImages(directories.current, setCurrentImages);
+
+    // Load meta
+    loadAndSetMeta(directories.current);
 
     // Set up polling
     const intervalId = setInterval(() => {
@@ -261,6 +310,7 @@ function App() {
           <Paper style={{ flex: 1, padding: 20 }} withBorder>
             {selectedImage ? (
               <ImageComparison
+                meta={meta}
                 selectedImage={selectedImage}
                 directories={directories}
                 setRefreshTrigger={setRefreshTrigger}
