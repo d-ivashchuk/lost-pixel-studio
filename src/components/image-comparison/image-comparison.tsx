@@ -35,6 +35,8 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     null
   );
 
+  const isBaseline = searchParams.get("isBaseline");
+
   const loadImageUrl = async (path: string): Promise<string | null> => {
     try {
       const imageFile = await readBinaryFile(path);
@@ -60,10 +62,23 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     }
   }, [searchParams, directories]);
 
+  if (isBaseline === "1" && baselineImageUrl) {
+    return (
+      <img
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+        }}
+        src={baselineImageUrl}
+      />
+    );
+  }
+
   return (
     <>
       <Group mb="sm">
         <SegmentedControl
+          disabled={["addition", "deletion"].includes(selectedImage.type)}
           size="xs"
           value={comparisonView}
           onChange={(value: "slider" | "difference" | "sideBySide") =>

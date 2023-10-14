@@ -6,7 +6,6 @@ import {
   Text,
   Group,
   LoadingOverlay,
-  Box,
 } from "@mantine/core";
 import "./App.css";
 
@@ -20,26 +19,25 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ImageComparison from "./components/image-comparison/image-comparison";
 import type { SpotlightAction } from "@mantine/spotlight";
 import { SpotlightProvider } from "@mantine/spotlight";
-import { parseGitStatus } from "./utils/parse-git-status";
 import { Command } from "@tauri-apps/api/shell";
 
-const actions: SpotlightAction[] = [
-  {
-    title: "Run Lost Pixel",
-    description: "Execute visual regression testing",
-    onTrigger: () => {},
-  },
-  {
-    title: "Settings",
-    description: "Get full information about current system status",
-    onTrigger: () => console.log("Dashboard"),
-  },
-  {
-    title: "Documentation",
-    description: "Visit documentation to lean more about all features",
-    onTrigger: () => console.log("Documentation"),
-  },
-];
+// const actions: SpotlightAction[] = [
+//   {
+//     title: "Run Lost Pixel",
+//     description: "Execute visual regression testing",
+//     onTrigger: () => {},
+//   },
+//   {
+//     title: "Settings",
+//     description: "Get full information about current system status",
+//     onTrigger: () => console.log("Dashboard"),
+//   },
+//   {
+//     title: "Documentation",
+//     description: "Visit documentation to lean more about all features",
+//     onTrigger: () => console.log("Documentation"),
+//   },
+// ];
 export type ImageType = "noDiff" | "diff" | "addition" | "deletion";
 
 export type Image = {
@@ -77,6 +75,10 @@ function App() {
   const [isLpRunLoading, setIsLpRunLoading] = useState<boolean>(false);
   const [isLpRunSuccess, setIsLpRunSuccess] = useState<boolean>(false);
   const [isLpRunError, setIsLpRunError] = useState<boolean>(false);
+  console.log({
+    isLpRunSuccess,
+    isLpRunError,
+  });
 
   const [baselineImages, setBaselineImages] = useState<Image[]>([]);
   const [currentImages, setCurrentImages] = useState<Image[]>([]);
@@ -191,8 +193,6 @@ function App() {
     },
   ];
 
-  const parsedGitFiles = parseGitStatus(gitStatus);
-
   return (
     <>
       <SpotlightProvider
@@ -204,11 +204,41 @@ function App() {
         <Container size="xl" style={{ display: "flex" }}>
           <LoadingOverlay visible={isLpRunLoading} />
           <Paper
-            style={{ width: "15%", marginRight: 20, padding: 20 }}
+            style={{ width: "20%", marginRight: 20, padding: 20 }}
             withBorder
           >
+            <Title order={4}>Changed</Title>
+            {images
+              .filter((image) =>
+                ["addition", "deletion", "diff"].includes(image.type)
+              )
+              .map((image) => (
+                <Group spacing="xs">
+                  <Text
+                    style={{ cursor: "pointer" }}
+                    truncate
+                    onClick={() => {
+                      setSearchParams({
+                        image: image.name,
+                      });
+                    }}
+                    color={
+                      image.type === "addition"
+                        ? "green"
+                        : image.type === "deletion"
+                        ? "red"
+                        : image.type === "diff"
+                        ? "blue"
+                        : "gray"
+                    }
+                    opacity={selectedImageName === image.name ? 1 : 0.5}
+                  >
+                    {image.name}
+                  </Text>
+                </Group>
+              ))}
             <Title order={4}>Baselines</Title>
-            {images.map((image) => (
+            {baselineImages.map((image) => (
               <Group spacing="xs">
                 <Text
                   style={{ cursor: "pointer" }}
@@ -216,17 +246,10 @@ function App() {
                   onClick={() => {
                     setSearchParams({
                       image: image.name,
+                      isBaseline: "1",
+                      blah: ";ajksf",
                     });
                   }}
-                  color={
-                    image.type === "addition"
-                      ? "green"
-                      : image.type === "deletion"
-                      ? "red"
-                      : image.type === "diff"
-                      ? "blue"
-                      : "gray"
-                  }
                   opacity={selectedImageName === image.name ? 1 : 0.5}
                 >
                   {image.name}

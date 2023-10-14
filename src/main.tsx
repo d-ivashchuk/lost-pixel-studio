@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 // basic window styles live here
 import "./styles.css";
 import App from "./App";
+import FolderSelection from "./components/folder-selection";
 //hooks are generated from the procedures defined in the tauri bindings
 
 const Providers = () => {
@@ -56,7 +57,12 @@ const router = createBrowserRouter([
       },
       {
         path: "/settings",
-        element: <div>123</div>,
+        element: (
+          <div>
+            {" "}
+            <FolderSelection />
+          </div>
+        ),
       },
     ],
   },

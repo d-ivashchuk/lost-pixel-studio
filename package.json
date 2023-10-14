@@ -20,7 +20,7 @@
     "@mantine/spotlight": "^6.0.19",
     "@tauri-apps/api": "^1.4.0",
     "framer-motion": "^10.15.2",
-    "lost-pixel": "^3.4.3",
+    "lost-pixel": "^3.7.1",
     "react": "^18.2.0",
     "react-compare-slider": "^2.2.0",
     "react-dom": "^18.2.0",
