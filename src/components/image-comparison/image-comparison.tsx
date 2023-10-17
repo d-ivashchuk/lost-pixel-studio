@@ -86,7 +86,7 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
 
   return (
     <>
-      <Group mb="sm">
+      <Group mb="sm" style={{ position: "sticky", top: 0 }}>
         {imageMetadata && (
           <DifferenceBadge
             displayMode={badgeDisplayMode}

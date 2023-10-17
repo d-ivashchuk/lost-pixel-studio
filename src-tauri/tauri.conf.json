@@ -19,9 +19,9 @@
         "execute": true,
         "scope": [
           {
-            "name": "run-lost-pixel",
+            "name": "npx",
             "cmd": "npx",
-            "args": ["lost-pixel, docker, meta"]
+            "args": ["lost-pixel", "docker", "meta"]
           }
         ]
       },

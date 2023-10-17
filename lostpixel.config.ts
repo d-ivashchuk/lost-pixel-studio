@@ -3,6 +3,7 @@ import type { CustomProjectConfig } from "lost-pixel";
 export const config: CustomProjectConfig = {
   storybookShots: {
     storybookUrl: "./storybook-static",
+    breakpoints: [200, 300, 900],
   },
 
   // pageShots: {

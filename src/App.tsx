@@ -6,6 +6,8 @@ import {
   Text,
   Group,
   LoadingOverlay,
+  Box,
+  Badge,
 } from "@mantine/core";
 import "./App.css";
 
@@ -84,7 +86,7 @@ const loadMeta = async (folder: string) => {
   const metaEntry = entries.find((entry) => entry.name === "meta.json");
 
   if (!metaEntry) {
-    throw new Error("meta.json not found in the specified folder");
+    return null;
   }
 
   // Assuming you have a readFile function to read file content
@@ -104,10 +106,6 @@ function App() {
   const [isLpRunLoading, setIsLpRunLoading] = useState<boolean>(false);
   const [isLpRunSuccess, setIsLpRunSuccess] = useState<boolean>(false);
   const [isLpRunError, setIsLpRunError] = useState<boolean>(false);
-  console.log({
-    isLpRunSuccess,
-    isLpRunError,
-  });
 
   const [baselineImages, setBaselineImages] = useState<Image[]>([]);
   const [currentImages, setCurrentImages] = useState<Image[]>([]);
@@ -153,6 +151,9 @@ function App() {
   const loadAndSetMeta = async (directory: string) => {
     if (directory) {
       const meta = await loadMeta(directory);
+      if (meta === null) {
+        return;
+      }
 
       // convert meta object to array before setting state, set keys as values, add other fields
       const metaArray = Object.keys(meta).map((key) => ({
@@ -211,13 +212,30 @@ function App() {
 
         if (typeof projectPath === "string") {
           setIsLpRunLoading(true);
-          const command = new Command("run-lost-pixel", ["lost-pixel"], {
+          const command = new Command("npx", ["lost-pixel", "docker", "meta"], {
             cwd: projectPath,
           });
+          const output = await command.execute();
+          console.log(output);
+
+          command.on("error", (error) => {
+            console.log(error);
+          });
+          command.on("close", (code) => {
+            console.log(code);
+          });
+          command.on("error", (error) =>
+            console.error(`command error: "${error}"`)
+          );
+          command.stdout.on("data", (line) =>
+            console.log(`command stdout: "${line}"`)
+          );
           try {
             await command.execute();
+
             setIsLpRunSuccess(true);
           } catch (error) {
+            console.log("321");
             console.error(`Command error: "${error}"`);
             setIsLpRunError(true);
           } finally {
@@ -250,18 +268,70 @@ function App() {
         shortcut="mod + k"
         nothingFoundMessage="Nothing found..."
       >
-        <Container size="xl" style={{ display: "flex" }}>
+        <Container size="xl" style={{ display: "flex", height: "95vh" }}>
           <LoadingOverlay visible={isLpRunLoading} />
           <Paper
             style={{ width: "20%", marginRight: 20, padding: 20 }}
             withBorder
           >
-            <Title order={4}>Changed</Title>
-            {images
-              .filter((image) =>
-                ["addition", "deletion", "diff"].includes(image.type)
-              )
-              .map((image) => (
+            {images.filter((image) => image.type !== "noDiff").length > 0 && (
+              <Box mah="300px" style={{ overflow: "scroll" }}>
+                <Title
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    background: "white",
+                    zIndex: 100,
+                  }}
+                  order={4}
+                >
+                  Changed
+                </Title>
+                {images
+                  .filter((image) =>
+                    ["addition", "deletion", "diff"].includes(image.type)
+                  )
+                  .map((image) => (
+                    <Group spacing="xs">
+                      <Text
+                        style={{ cursor: "pointer" }}
+                        truncate
+                        onClick={() => {
+                          setSearchParams({
+                            image: image.name,
+                          });
+                        }}
+                        color={
+                          image.type === "addition"
+                            ? "green"
+                            : image.type === "deletion"
+                            ? "red"
+                            : image.type === "diff"
+                            ? "blue"
+                            : "gray"
+                        }
+                        opacity={selectedImageName === image.name ? 1 : 0.5}
+                      >
+                        {image.name}
+                      </Text>
+                    </Group>
+                  ))}
+              </Box>
+            )}
+            <Box mah="41vh" style={{ overflow: "scroll" }}>
+              <Group
+                spacing={3}
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  background: "white",
+                  zIndex: 100,
+                }}
+              >
+                <Title order={4}>Baselines</Title>
+                <Badge size="xs">{baselineImages.length}</Badge>
+              </Group>
+              {baselineImages.map((image) => (
                 <Group spacing="xs">
                   <Text
                     style={{ cursor: "pointer" }}
@@ -269,45 +339,22 @@ function App() {
                     onClick={() => {
                       setSearchParams({
                         image: image.name,
+                        isBaseline: "1",
                       });
                     }}
-                    color={
-                      image.type === "addition"
-                        ? "green"
-                        : image.type === "deletion"
-                        ? "red"
-                        : image.type === "diff"
-                        ? "blue"
-                        : "gray"
-                    }
                     opacity={selectedImageName === image.name ? 1 : 0.5}
                   >
                     {image.name}
                   </Text>
                 </Group>
               ))}
-            <Title order={4}>Baselines</Title>
-            {baselineImages.map((image) => (
-              <Group spacing="xs">
-                <Text
-                  style={{ cursor: "pointer" }}
-                  truncate
-                  onClick={() => {
-                    setSearchParams({
-                      image: image.name,
-                      isBaseline: "1",
-                      blah: ";ajksf",
-                    });
-                  }}
-                  opacity={selectedImageName === image.name ? 1 : 0.5}
-                >
-                  {image.name}
-                </Text>
-              </Group>
-            ))}
+            </Box>
           </Paper>
 
-          <Paper style={{ flex: 1, padding: 20 }} withBorder>
+          <Paper
+            style={{ flex: 1, padding: 20, overflow: "scroll" }}
+            withBorder
+          >
             {selectedImage ? (
               <ImageComparison
                 meta={meta}
